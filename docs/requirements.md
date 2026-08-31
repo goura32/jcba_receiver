@@ -2,7 +2,7 @@
 
 ## 目的
 
-JCBA インターネットサイマルラジオを、局検索・お気に入り・番組情報・安定した Ogg/Opus 再生で利用できるローカル Web アプリとして提供する。
+JCBA インターネットサイマルラジオを、局検索・お気に入り・番組情報・安定したライブ再生で利用できるローカル Web アプリとして提供する。
 
 ## 利用者機能
 
@@ -17,7 +17,7 @@ JCBA インターネットサイマルラジオを、局検索・お気に入り
 
 - stream session は `GET /api/v1/select_stream` の都度新しい `token` と `location` を使用する。
 - WSS は `listener.fmplapla.com` を subprotocol とし、接続直後に token を TEXT 送信する。
-- バックエンドは WSS の Ogg/Opus binary frame を HTTP ストリームとしてブラウザへ中継する。これによりブラウザの Origin 制約を避け、`<audio>` のネイティブ Ogg/Opus デコーダを利用する。
+- バックエンドは WSS の Ogg/Opus binary frame を受信し、ffmpeg で MP3 HTTP ストリームに変換してブラウザへ中継する。これにより Origin 制約とブラウザごとの Ogg live-stream 互換性を避ける。
 - `select_stream` の 404 は `UNAVAILABLE` として HTTP 503 で表し、UI は再生不能な一時状態として提示する。
 - WSS 切断時は 1, 2, 5 秒のバックオフで、常に session API から再取得して再接続する。
 - station directory と番組情報は音声再生から独立し、番組表の失敗は再生を妨げない。

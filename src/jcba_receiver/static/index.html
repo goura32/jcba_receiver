@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07111f" />
+    <title>JCBA Receiver — Internet Simulradio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/app.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="JCBA Receiver ホーム"><span class="brand-mark">◒</span><span>JCBA<br /><b>RECEIVER</b></span></a>
+        <div class="broadcast-pill"><i></i><span id="connection-label">STANDBY</span></div>
+        <span class="station-count" id="station-count">— STATIONS</span>
+      </header>
+
+      <section class="content-grid">
+        <aside class="directory panel">
+          <div class="section-heading"><div><p class="eyebrow">STATION DIRECTORY</p><h1>放送局を探す</h1></div><button class="icon-button" id="favorites-filter" aria-label="お気に入りだけを表示" aria-pressed="false">★</button></div>
+          <label class="search"><span>⌕</span><input id="search" type="search" placeholder="局名・地域で検索" autocomplete="off" /></label>
+          <div class="region-chips" id="region-chips" aria-label="地域で絞り込み"></div>
+          <div class="station-list" id="station-list" aria-live="polite"></div>
+        </aside>
+
+        <section class="player-area">
+          <article class="now-playing panel">
+            <div class="signal-line"><span>LIVE SIGNAL</span><span id="stream-state" aria-live="polite">停止中</span></div>
+            <div class="artwork" aria-hidden="true"><div class="orb orb-one"></div><div class="orb orb-two"></div><div class="gridlines"></div><span class="frequency">JCBA<br />∞</span></div>
+            <div class="station-meta"><p class="eyebrow" id="station-region">SELECT A STATION</p><h2 id="station-name">放送局を選択</h2><p id="station-prefecture">全国のコミュニティ FM をお楽しみください</p></div>
+            <div class="wave" id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="transport">
+              <button class="play-button" id="play-button" aria-label="再生"><span id="play-icon">▶</span></button>
+              <div class="volume-control"><button class="mute-button" id="mute-button" aria-label="ミュート">◖</button><input id="volume" aria-label="音量" type="range" min="0" max="100" value="78" /></div>
+              <button class="favorite-button" id="favorite-button" aria-label="お気に入りに追加" aria-pressed="false">☆</button>
+            </div>
+            <p class="notice" id="notice">局を選択すると再生できます。</p>
+            <audio id="audio" preload="none"></audio>
+          </article>
+
+          <article class="program-card panel">
+            <div class="program-title-row"><div><p class="eyebrow">ON AIR NOW</p><h3 id="program-title">番組情報</h3></div><span class="program-dot"></span></div>
+            <p id="program-performer">局を選択すると、提供されている番組情報を表示します。</p>
+            <p class="program-detail" id="program-detail"></p>
+          </article>
+
+          <article class="guide-card"><span class="guide-icon">⌁</span><div><strong>リレー受信について</strong><p>音声は安全なローカルリレーを経由して Ogg/Opus で再生します。配信停止時はいつでも再試行できます。</p></div></article>
+        </section>
+      </section>
+    </main>
+    <script type="module" src="/static/app.js"></script>
+  </body>
+</html>
