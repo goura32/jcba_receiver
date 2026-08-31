@@ -60,22 +60,23 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="Station not found")
         client: JcbaClient = app.state.jcba_client
 
+        session = None
+
         async def body():
             try:
-                async for chunk in transcode_to_mp3(client.relay_ogg(station_id)):
+                async for chunk in transcode_to_mp3(client.relay_ogg(station_id, session)):
                     yield chunk
             except StreamUnavailableError as exc:
                 # Headers may already be committed, so this route preflights below.
                 raise exc
 
         try:
-            await client.create_session(station_id)
+            session = await client.create_session(station_id)
         except StreamUnavailableError as exc:
             raise HTTPException(status_code=503, detail="This station is currently unavailable") from exc
         except StreamSessionError as exc:
             raise HTTPException(status_code=502, detail="Unable to create a stream session") from exc
 
-        # The preflight session must never be reused; relay_ogg obtains a fresh token/location.
         return StreamingResponse(
             body(),
             media_type="audio/mpeg",

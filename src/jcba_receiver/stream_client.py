@@ -87,11 +87,13 @@ class JcbaClient:
         except ValueError:
             return False
 
-    async def relay_ogg(self, station_id: str) -> AsyncIterator[bytes]:
+    async def relay_ogg(
+        self, station_id: str, initial_session: StreamSession | None = None
+    ) -> AsyncIterator[bytes]:
         """Yield Ogg pages, renewing session after transient WSS disconnects."""
         delays = (1, 2, 5)
         for attempt, delay in enumerate((*delays, None)):
-            session = await self.create_session(station_id)
+            session = initial_session if attempt == 0 and initial_session else await self.create_session(station_id)
             try:
                 async with websockets.connect(
                     session.location,
