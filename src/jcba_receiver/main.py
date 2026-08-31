@@ -6,16 +6,21 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-import uvicorn
 import httpx
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from .audio import transcode_to_mp3
+from .audio import AudioTranscodeError, ensure_ffmpeg_available, transcode_to_mp3
 from .directory import StationDirectory
 from .programs import get_current_program
-from .stream_client import JcbaClient, StreamSessionError, StreamUnavailableError, WebSocketConnectionError
+from .stream_client import (
+    JcbaClient,
+    StreamSessionError,
+    StreamUnavailableError,
+    WebSocketConnectionError,
+)
 
 STATIC_DIR = Path(__file__).parent / "static"
 logger = logging.getLogger(__name__)
@@ -68,12 +73,15 @@ def create_app() -> FastAPI:
             try:
                 async for chunk in transcode_to_mp3(client.relay_ogg(station_id, session)):
                     yield chunk
-            except (StreamUnavailableError, StreamSessionError, WebSocketConnectionError) as exc:
+            except (AudioTranscodeError, StreamUnavailableError, StreamSessionError, WebSocketConnectionError) as exc:
                 # A streaming response is already committed; log and close it cleanly.
                 logger.warning("Ending relay for %s: %s", station_id, exc)
 
         try:
+            ensure_ffmpeg_available()
             session = await client.create_session(station_id)
+        except AudioTranscodeError as exc:
+            raise HTTPException(status_code=503, detail="Audio transcoder is unavailable") from exc
         except StreamUnavailableError as exc:
             raise HTTPException(status_code=503, detail="This station is currently unavailable") from exc
         except StreamSessionError as exc:

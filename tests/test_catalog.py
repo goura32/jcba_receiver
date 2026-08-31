@@ -1,4 +1,4 @@
-from jcba_receiver.catalog import STATIONS, find_station, filter_stations
+from jcba_receiver.catalog import STATIONS, filter_stations, find_station
 
 
 def test_catalog_contains_known_station_with_real_station_id():

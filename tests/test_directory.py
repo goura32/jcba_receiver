@@ -1,4 +1,5 @@
-from jcba_receiver.directory import parse_stations
+from jcba_receiver.catalog import STATIONS
+from jcba_receiver.directory import StationDirectory, parse_stations
 
 
 def test_parse_stations_extracts_official_ids_and_display_metadata():
@@ -17,3 +18,10 @@ def test_parse_stations_ignores_malformed_group_lists():
     html = '<script>{"stations":[{"list":null},{"list":{"id":"bad"}}]}</script>'
 
     assert parse_stations(html) == []
+
+
+def test_directory_ignores_malformed_cache(tmp_path):
+    cache = tmp_path / "stations.json"
+    cache.write_text('["not-a-station"]', encoding="utf-8")
+
+    assert StationDirectory(cache).stations == STATIONS

@@ -57,3 +57,26 @@ async def test_create_session_rejects_non_object_json():
         client = JcbaClient(http_client=http_client)
         with pytest.raises(StreamSessionError):
             await client.create_session("fmnanami")
+
+
+@pytest.mark.asyncio
+async def test_create_session_maps_invalid_json_to_session_error():
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, content=b"{invalid"))
+    ) as http_client:
+        with pytest.raises(StreamSessionError):
+            await JcbaClient(http_client=http_client).create_session("fmnanami")
+
+
+@pytest.mark.asyncio
+async def test_create_session_rejects_invalid_location_port():
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                200,
+                json={"code": 200, "token": "secret", "location": "wss://os1305.radimo.smen.biz:bad/socket"},
+            )
+        )
+    ) as http_client:
+        with pytest.raises(StreamSessionError):
+            await JcbaClient(http_client=http_client).create_session("fmnanami")

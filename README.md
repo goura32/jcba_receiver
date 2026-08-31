@@ -52,6 +52,7 @@ token と location はキャッシュ・ログ・ブラウザへの公開を行�
 
 ```bash
 .venv/bin/pytest -q
+.venv/bin/ruff check .
 node --check src/jcba_receiver/static/app.js
 .venv/bin/python -m compileall -q src
 ```
