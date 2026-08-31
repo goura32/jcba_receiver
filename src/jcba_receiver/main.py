@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from .programs import get_current_program
 from .stream_client import JcbaClient, StreamSessionError, StreamUnavailableError, WebSocketConnectionError
 
 STATIC_DIR = Path(__file__).parent / "static"
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -66,9 +68,9 @@ def create_app() -> FastAPI:
             try:
                 async for chunk in transcode_to_mp3(client.relay_ogg(station_id, session)):
                     yield chunk
-            except StreamUnavailableError as exc:
-                # Headers may already be committed, so this route preflights below.
-                raise exc
+            except (StreamUnavailableError, StreamSessionError, WebSocketConnectionError) as exc:
+                # A streaming response is already committed; log and close it cleanly.
+                logger.warning("Ending relay for %s: %s", station_id, exc)
 
         try:
             session = await client.create_session(station_id)
