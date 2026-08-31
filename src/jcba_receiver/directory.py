@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 from pathlib import Path
 
 import httpx
@@ -34,19 +35,22 @@ def parse_stations(html: str) -> list[dict[str, str]]:
     if not isinstance(data, list):
         return []
     stations = []
+    seen_ids: set[str] = set()
     grouped = [entry.get("list") for entry in data if isinstance(entry, dict) and "list" in entry]
     entries = [item for group in grouped if isinstance(group, list) for item in group] if grouped else data
     for item in entries:
         if not isinstance(item, dict) or not all(isinstance(item.get(key), str) for key in ("id", "name")):
             continue
-        stations.append(
-            {
-                "id": item["id"],
-                "name": item["name"],
-                "region": item.get("region") if isinstance(item.get("region"), str) else "",
-                "prefecture": item.get("prefecture") if isinstance(item.get("prefecture"), str) else "",
-            }
-        )
+        station = {
+            "id": item["id"],
+            "name": item["name"],
+            "region": item.get("region") if isinstance(item.get("region"), str) else "",
+            "prefecture": item.get("prefecture") if isinstance(item.get("prefecture"), str) else "",
+        }
+        if not _is_station(station) or station["id"] in seen_ids:
+            continue
+        seen_ids.add(station["id"])
+        stations.append(station)
     return stations
 
 
@@ -61,7 +65,10 @@ class StationDirectory:
     def _load_cache(self) -> list[dict[str, str]]:
         try:
             data = json.loads(self.cache_path.read_text(encoding="utf-8"))
-            return data if isinstance(data, list) and data and all(_is_station(item) for item in data) else []
+            if not isinstance(data, list) or not data or not all(_is_station(item) for item in data):
+                return []
+            station_ids = {item["id"] for item in data}
+            return data if len(station_ids) == len(data) else []
         except (OSError, json.JSONDecodeError):
             return []
 
@@ -73,6 +80,16 @@ class StationDirectory:
         if not stations:
             raise ValueError("JCBA directory did not contain station data")
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
-        self.cache_path.write_text(json.dumps(stations, ensure_ascii=False), encoding="utf-8")
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=self.cache_path.parent,
+            prefix=f".{self.cache_path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temp_file:
+            temp_file.write(json.dumps(stations, ensure_ascii=False))
+            temp_path = Path(temp_file.name)
+        temp_path.replace(self.cache_path)
         self.stations = stations
         return stations

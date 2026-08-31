@@ -103,6 +103,8 @@ class JcbaClient:
                     ping_interval=20,
                     ping_timeout=15,
                 ) as socket:
+                    if socket.subprotocol != SUBPROTOCOL:
+                        raise WebSocketConnectionError("Required WebSocket subprotocol was not negotiated")
                     await socket.send(session.token)
                     while True:
                         message = await asyncio.wait_for(socket.recv(), timeout=15)

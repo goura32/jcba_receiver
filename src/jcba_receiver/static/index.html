@@ -22,7 +22,7 @@
         <aside class="directory panel">
           <div class="section-heading"><div><p class="eyebrow">STATION DIRECTORY</p><h1>放送局を探す</h1></div><button class="icon-button" id="favorites-filter" aria-label="お気に入りだけを表示" aria-pressed="false">★</button></div>
           <label class="search"><span>⌕</span><input id="search" type="search" placeholder="局名・地域で検索" autocomplete="off" /></label>
-          <div class="region-chips" id="region-chips" aria-label="地域で絞り込み"></div>
+          <div class="region-chips" id="region-chips" role="group" aria-label="地域で絞り込み"></div>
           <div class="station-list" id="station-list" aria-live="polite"></div>
         </aside>
 
@@ -34,7 +34,7 @@
             <div class="wave" id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div class="transport">
               <button class="play-button" id="play-button" aria-label="再生"><span id="play-icon">▶</span></button>
-              <div class="volume-control"><button class="mute-button" id="mute-button" aria-label="ミュート">◖</button><input id="volume" aria-label="音量" type="range" min="0" max="100" value="78" /></div>
+              <div class="volume-control"><button class="mute-button" id="mute-button" aria-label="ミュート" aria-pressed="false">◖</button><input id="volume" aria-label="音量" type="range" min="0" max="100" value="78" /></div>
               <button class="favorite-button" id="favorite-button" aria-label="お気に入りに追加" aria-pressed="false">☆</button>
             </div>
             <p class="notice" id="notice">局を選択すると再生できます。</p>
